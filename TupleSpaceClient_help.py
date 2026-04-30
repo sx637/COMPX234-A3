@@ -95,11 +95,32 @@ def main():
             # - Send:    sock.sendall(message.encode())
             # - Receive: first read 3 bytes to get the response size (like the server does).
             #            Then read the remaining (size - 3) bytes to get the response body.
-
-
+            
+            try:
+                sock.sendall(message.encode())
+            except ValueError:
+                print(f"error: Invalid response size for :{line}")
+                continue  
+                
+            remaining_bytes = response_size - 3
+            if remaining_bytes > 0:
+                    response_body = sock.recv(remaining_bytes)
+                    if len(response_body) < remaining_bytes:
+                        print(f"Error: Incomplete response for: {line}")
+                        continue
+            else:
+                 response_body = b""
+                    
+            response_buffer = size_bytes +response_body
             response = response_buffer.decode().strip()
             print(f"{line}: {response}")
+            
+    except (socket.error,ValueError) as e:        
+            print(f"Error processing line '{line}':{e}")
+            
+            continue
 
+     
     except (socket.error, ValueError) as e:
         print(f"Error: {e}")
         sys.exit(1)
