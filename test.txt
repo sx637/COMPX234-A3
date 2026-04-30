@@ -1,0 +1,8 @@
+PUT name Zhang
+READ name
+GET name
+PUT age 20
+READ age
+GET age
+PUT score 99
+READ score

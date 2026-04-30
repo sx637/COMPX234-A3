@@ -23,7 +23,7 @@ def main():
     # Then call sock.connect((hostname, port)) to connect.
     try:
         sock= socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        sock.connect((hostname.port))
+        sock.connect((hostname,port))
     except socket.error as e:
         print(f"Error connecting to server : {e}")
         sys.exit(1)
@@ -79,7 +79,7 @@ def main():
                 total_size = 6+len(key)
                 message= f"{total_size :03d} {op_code} {key}"
             else:
-                op_code = "p"
+                op_code = "P"
                 total_size= 7 + len(key) +len(value)
                 message= f"{total_size :03d} {op_code} {key} {value}"
                 
@@ -96,10 +96,8 @@ def main():
             # - Receive: first read 3 bytes to get the response size (like the server does).
             #            Then read the remaining (size - 3) bytes to get the response body.
             try:
-                # 发送请求
                 sock.sendall(message.encode())
                 
-                # 接收响应大小
                 size_bytes = sock.recv(3)
                 if len(size_bytes) < 3:
                     print(f"Error: Failed to receive response size for: {line}")
@@ -110,8 +108,7 @@ def main():
                 except ValueError:
                     print(f"Error: Invalid response size for: {line}")
                     continue
-                
-                # 接收响应体
+        
                 remaining_bytes = response_size - 3
                 if remaining_bytes > 0:
                     response_body = sock.recv(remaining_bytes)
@@ -121,7 +118,6 @@ def main():
                 else:
                     response_body = b""
                 
-                # 组合完整响应
                 response_buffer = size_bytes + response_body
                 response = response_buffer.decode().strip()
                 print(f"{line}: {response}")
