@@ -95,36 +95,47 @@ def main():
             # - Send:    sock.sendall(message.encode())
             # - Receive: first read 3 bytes to get the response size (like the server does).
             #            Then read the remaining (size - 3) bytes to get the response body.
-            
             try:
+                # 发送请求
                 sock.sendall(message.encode())
-            except ValueError:
-                print(f"error: Invalid response size for :{line}")
-                continue  
                 
-            remaining_bytes = response_size - 3
-            if remaining_bytes > 0:
+                # 接收响应大小
+                size_bytes = sock.recv(3)
+                if len(size_bytes) < 3:
+                    print(f"Error: Failed to receive response size for: {line}")
+                    continue
+                
+                try:
+                    response_size = int(size_bytes.decode())
+                except ValueError:
+                    print(f"Error: Invalid response size for: {line}")
+                    continue
+                
+                # 接收响应体
+                remaining_bytes = response_size - 3
+                if remaining_bytes > 0:
                     response_body = sock.recv(remaining_bytes)
                     if len(response_body) < remaining_bytes:
                         print(f"Error: Incomplete response for: {line}")
                         continue
-            else:
-                 response_body = b""
-                    
-            response_buffer = size_bytes +response_body
-            response = response_buffer.decode().strip()
-            print(f"{line}: {response}")
-            
-    except (socket.error,ValueError) as e:        
-            print(f"Error processing line '{line}':{e}")
-            
-            continue
+                else:
+                    response_body = b""
+                
+                # 组合完整响应
+                response_buffer = size_bytes + response_body
+                response = response_buffer.decode().strip()
+                print(f"{line}: {response}")
+                
+            except (socket.error, ValueError) as e:
+                print(f"Error processing line '{line}': {e}")
+                continue
 
-     
     except (socket.error, ValueError) as e:
         print(f"Error: {e}")
         sys.exit(1)
     finally:
+           
+    
         # TASK 4: Close the socket when done (already called for you — explain why
         # finally: is the right place to do this even if an error occurs above).
         sock.close()
