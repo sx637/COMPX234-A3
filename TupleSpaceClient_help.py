@@ -21,8 +21,15 @@ def main():
     # TASK 1: Create a TCP/IP socket and connect it to the server.
     # Hint: socket.socket(socket.AF_INET, socket.SOCK_STREAM) creates the socket.
     # Then call sock.connect((hostname, port)) to connect.
-
-
+    try:
+        sock= socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        sock.connect((hostname.port))
+    except socket.error as e:
+        print(f"Error connecting to server : {e}")
+        sys.exit(1)
+    
+    
+    
     try:
         for line in lines:
             line = line.strip()
@@ -30,8 +37,30 @@ def main():
                 continue
 
             parts = line.split(" ", 2)
+            if len(parts) < 2:
+                print(f"Error: Invalid line format : {line}")
+                continue
             cmd = parts[0]
-            message = ""
+            key=parts[1]
+            value=parts[2] if len(parts)>2 else""
+            
+            #verify opreation type
+            if cmd not in ["READ","GET","PUT"]:
+                print(f"Error:Unknown command '{cmd}' in line:{line}")
+                continue
+            
+            
+            #verify len key
+            if len (key)>999:
+                print(f"Error:Value for key '{key}' exceeds 999 characters")
+                continue
+            
+            
+            if len (key) + 1 + len (value) > 970:
+                print(f"Error : key + value size exceeds 970 characters for line :{line}")
+                continue
+            
+            
 
             # TASK 2: Build the protocol message string to send to the server.
             # Format:  "NNN X key"        for READ / GET
