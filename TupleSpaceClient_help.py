@@ -69,6 +69,26 @@ def main():
             # X is "R" for READ and "G" for GET.
             # Hint: for READ/GET, size = 6 + len(key). For PUT, size = 7 + len(key) + len(value).
             # Reject lines with invalid format or key+" "+value > 970 chars.
+            
+            if cmd == "READ":
+                op_code ="R"
+                total_size = 6 + len(key)
+                message =f"{total_size :03d} {op_code} {key}"
+            elif cmd=="GET":
+                op_code ="G"
+                total_size = 6+len(key)
+                message= f"{total_size :03d} {op_code} {key}"
+            else:
+                op_code = "p"
+                total_size= 7 + len(key) +len(value)
+                message= f"{total_size :03d} {op_code} {key} {value}"
+                
+            #verify message length again 
+            if total_size > 999:
+                print(f"Error : Message size {total_size} exceeds maximum 999 for line :{line}")
+                continue
+            
+            
 
 
             # TASK 3: Send the message to the server, then receive the response.
