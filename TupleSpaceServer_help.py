@@ -75,12 +75,12 @@ def handle_client(client_socket):
             # TASK 1: Read the first 3 bytes to get the message size, then read
             # the remaining (size - 3) bytes and decode to a string.
             # Hint: use receive_n(). If nothing arrives, client disconnected — break.
-            size_bytes =receive_n(client_socket,3)
-            if len(size_bytes)<3:
-                break
+            size_bytes = receive_n(client_socket, 3)
+            if len(size_bytes) < 3:
+                break  # Client disconnected
             
             try:
-                messsage_size = int(size_bytes.decode())
+                message_size = int(size_bytes.decode())
             except ValueError:
                 increment_stat("error_count")
                 response = "ERR Invalid message size"
@@ -95,6 +95,7 @@ def handle_client(client_socket):
                 client_socket.sendall(response_msg.encode())
                 continue
             
+            
             body_size = message_size - 3
             if body_size > 0:
                 message_body = receive_n(client_socket, body_size)
@@ -103,15 +104,12 @@ def handle_client(client_socket):
             else:
                 message_body = b""
             
+            # combine information
             message_buffer = size_bytes + message_body
             message = message_buffer.decode().strip()
             
-            # 处理请求
+            # handle request
             response = handle_request(message)
-
-
-            # Handle the request
-            response = handle_request(message_buffer)
 
             # TASK 2: Build the response string with its size prepended (3 digits + space),
             # then send it. Hint: total size = len(response) + 4. Use sendall().
